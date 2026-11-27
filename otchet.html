@@ -1,308 +1,468 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Генератор отчетов</title>
-<style>
-  * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-  body { margin: 0; padding: 12px; background: #f0f2f5; color: #1c1e21; }
-  .card { background: #fff; border-radius: 14px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); max-width: 500px; margin: 0 auto; }
-  
-  /* Вкладки */
-  .tabs { display: flex; gap: 8px; margin-bottom: 16px; background: #e4e6eb; padding: 4px; border-radius: 10px; }
-  .tab { flex: 1; padding: 10px; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; background: transparent; color: #65676b; cursor: pointer; }
-  .tab.active { background: #fff; color: #2481cc; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-  
-  /* Поля ввода */
-  label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #555; }
-  input { width: 100%; padding: 10px; border: 1px solid #ccd0d5; border-radius: 8px; font-size: 16px; margin-bottom: 12px; }
-  input:focus { outline: none; border-color: #2481cc; }
-  
-  /* Строка детали */
-  .part-row { display: grid; grid-template-columns: 1.3fr 1fr 1fr 1fr 34px; gap: 6px; align-items: center; margin-bottom: 8px; }
-  .part-row input { margin-bottom: 0; padding: 8px 6px; font-size: 15px; text-align: center; }
-  .part-row input.part-name { text-align: left; }
-  .row-headers { display: grid; grid-template-columns: 1.3fr 1fr 1fr 1fr 34px; gap: 6px; font-size: 11px; color: #777; text-align: center; margin-bottom: 4px; }
-  .row-headers span:first-child { text-align: left; }
-  
-  /* Кнопки */
-  .btn-del { background: #ffebe9; color: #d93025; border: none; border-radius: 8px; height: 36px; font-weight: bold; font-size: 16px; }
-  .btn-add { width: 100%; padding: 10px; background: #e7f3ff; color: #2481cc; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; margin-bottom: 14px; }
-  .btn-copy { width: 100%; padding: 14px; background: #2481cc; color: #fff; border: none; border-radius: 10px; font-weight: 600; font-size: 16px; margin-top: 8px; }
-  .btn-copy:active { background: #1a66a3; }
-  
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .hidden { display: none; }
-  .preview { background: #f8f9fa; border: 1px dashed #ccd0d5; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 13px; white-space: pre-wrap; margin-top: 14px; }
 
-     /* Строки для вкладки Тайминг */
-  .t-section-title { font-size: 13px; font-weight: 700; color: #2481cc; margin: 10px 0 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-  .timing-row { display: grid; grid-template-columns: 1.5fr 1fr 34px; gap: 6px; align-items: center; margin-bottom: 8px; }
-  .timing-row input { margin-bottom: 0; padding: 8px 6px; font-size: 15px; text-align: center; }
-  .timing-row input.text-left { text-align: left; }
-</style>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Генератор отчетов</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 12px;
+      background: #f0f2f5;
+      color: #1c1e21;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    /* Вкладки */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      background: #e4e6eb;
+      padding: 4px;
+      border-radius: 10px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      background: transparent;
+      color: #65676b;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      background: #fff;
+      color: #2481cc;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Поля ввода */
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #555;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccd0d5;
+      border-radius: 8px;
+      font-size: 16px;
+      margin-bottom: 12px;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #2481cc;
+    }
+
+    /* Строка детали */
+    .part-row {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr 1fr 1fr 34px;
+      gap: 6px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .part-row input {
+      margin-bottom: 0;
+      padding: 8px 6px;
+      font-size: 15px;
+      text-align: center;
+    }
+
+    .part-row input.part-name {
+      text-align: left;
+    }
+
+    .row-headers {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr 1fr 1fr 34px;
+      gap: 6px;
+      font-size: 11px;
+      color: #777;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .row-headers span:first-child {
+      text-align: left;
+    }
+
+    /* Кнопки */
+    .btn-del {
+      background: #ffebe9;
+      color: #d93025;
+      border: none;
+      border-radius: 8px;
+      height: 36px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .btn-add {
+      width: 100%;
+      padding: 10px;
+      background: #e7f3ff;
+      color: #2481cc;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 14px;
+    }
+
+    .btn-copy {
+      width: 100%;
+      padding: 14px;
+      background: #2481cc;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 16px;
+      margin-top: 8px;
+    }
+
+    .btn-copy:active {
+      background: #1a66a3;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .preview {
+      background: #f8f9fa;
+      border: 1px dashed #ccd0d5;
+      border-radius: 8px;
+      padding: 12px;
+      font-family: monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+      margin-top: 14px;
+    }
+
+    /* Строки для вкладки Тайминг */
+    .t-section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #2481cc;
+      margin: 10px 0 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .timing-row {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 34px;
+      gap: 6px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .timing-row input {
+      margin-bottom: 0;
+      padding: 8px 6px;
+      font-size: 15px;
+      text-align: center;
+    }
+
+    .timing-row input.text-left {
+      text-align: left;
+    }
+  </style>
 </head>
 
 <body>
-<div class="card">
-  <!-- Переключатель отчетов -->
+  <div class="card">
+    <!-- Переключатель отчетов -->
     <div class="tabs">
-    <button class="tab active" id="tab-night" onclick="switchTab('night')">С ночи (снял)</button>
-    <button class="tab" id="tab-day" onclick="switchTab('day')">За весь день</button>
-    <button class="tab" id="tab-timing" onclick="switchTab('timing')">Тайминг</button>
-  </div>
+      <button class="tab active" id="tab-night" onclick="switchTab('night')">С ночи (снял)</button>
+      <button class="tab" id="tab-day" onclick="switchTab('day')">За весь день</button>
+      <button class="tab" id="tab-timing" onclick="switchTab('timing')">Тайминг</button>
+    </div>
 
-  <!-- Общее поле: Участок -->
-  <label>Номер участка</label>
-  <input type="text" id="sector" placeholder="Например: 29" oninput="updatePreview()">
+    <!-- Общее поле: Участок -->
+    <label>Номер участка</label>
+    <input type="text" id="sector" placeholder="Например: 29" oninput="updatePreview()">
 
-  <div id="standard-fields">
-  <!-- Список деталей -->
-  <div class="row-headers">
-    <span>Деталь</span>
-    <span>План</span>
-    <span>Факт</span>
-    <span>Брак</span>
-    <span></span>
-  </div>
-  <div id="parts-container"></div>
-  <button class="btn-add" onclick="addPartRow()">+ Добавить деталь</button>
-
-  <!-- Блок только для отчета "За весь день" -->
-  <div id="day-fields" class="hidden">
-    <div class="grid-2">
-      <div>
-        <label>Принял принтеров</label>
-        <input type="number" id="printers-in" placeholder="104" oninput="updatePreview()">
+    <div id="standard-fields">
+      <!-- Список деталей -->
+      <div class="row-headers">
+        <span>Деталь</span>
+        <span>План</span>
+        <span>Факт</span>
+        <span>Брак</span>
+        <span></span>
       </div>
-      <div>
-        <label>Сдал принтеров</label>
-        <input type="number" id="printers-out" placeholder="104" oninput="updatePreview()">
+      <div id="parts-container"></div>
+      <button class="btn-add" onclick="addPartRow()">+ Добавить деталь</button>
+
+      <!-- Блок только для отчета "За весь день" -->
+      <div id="day-fields" class="hidden">
+        <div class="grid-2">
+          <div>
+            <label>Принял принтеров</label>
+            <input type="number" id="printers-in" placeholder="104" oninput="updatePreview()">
+          </div>
+          <div>
+            <label>Сдал принтеров</label>
+            <input type="number" id="printers-out" placeholder="104" oninput="updatePreview()">
+          </div>
+        </div>
+        <label>Комментарий</label>
+        <input type="text" id="comment" placeholder="-" oninput="updatePreview()">
       </div>
     </div>
-    <label>Комментарий</label>
-    <input type="text" id="comment" placeholder="-" oninput="updatePreview()">
-  </div>
-  </div>
 
     <!-- Блок только для отчета "Тайминг" -->
-  <div id="timing-fields" class="hidden">
-    <div class="t-section-title">1. Что снял</div>
-    <div class="row-headers" style="grid-template-columns: 1.5fr 1fr 34px;">
-      <span>Деталь</span>
-      <span>Кол-во (шт)</span>
-      <span></span>
-    </div>
-    <div id="t-removed-container"></div>
-    <button class="btn-add" onclick="addRemovedRow()">+ Добавить деталь</button>
+    <div id="timing-fields" class="hidden">
+      <div class="t-section-title">1. Что снял</div>
+      <div class="row-headers" style="grid-template-columns: 1.5fr 1fr 34px;">
+        <span>Деталь</span>
+        <span>Кол-во (шт)</span>
+        <span></span>
+      </div>
+      <div id="t-removed-container"></div>
+      <button class="btn-add" onclick="addRemovedRow()">+ Добавить деталь</button>
 
-        <div class="t-section-title">2. Что запущено</div>
-    <div class="row-headers" style="grid-template-columns: 1.2fr 0.9fr 1fr 34px;">
-      <span>Деталь</span>
-      <span>Принтеры</span>
-      <span>Время (Ч:ММ)</span>
-      <span></span>
+      <div class="t-section-title">2. Что запущено</div>
+      <div class="row-headers" style="grid-template-columns: 1.2fr 0.9fr 1fr 34px;">
+        <span>Деталь</span>
+        <span>Принтеры</span>
+        <span>Время (Ч:ММ)</span>
+        <span></span>
+      </div>
+      <div id="t-launched-container"></div>
+      <button class="btn-add" onclick="addLaunchedRow()">+ Добавить запуск</button>
     </div>
-    <div id="t-launched-container"></div>
-    <button class="btn-add" onclick="addLaunchedRow()">+ Добавить запуск</button>
+
+    <!-- Предпросмотр и кнопка -->
+    <div class="preview" id="preview"></div>
+    <button class="btn-copy" id="copy-btn" onclick="copyReport()">Скопировать отчет</button>
   </div>
 
-  <!-- Предпросмотр и кнопка -->
-  <div class="preview" id="preview"></div>
-  <button class="btn-copy" id="copy-btn" onclick="copyReport()">Скопировать отчет</button>
-</div>
-
-<script>
-  let currentType = 'night';
+  <script>
+    let currentType = 'night';
 
     function switchTab(type) {
-    currentType = type;
-    document.getElementById('tab-night').classList.toggle('active', type === 'night');
-    document.getElementById('tab-day').classList.toggle('active', type === 'day');
-    document.getElementById('tab-timing').classList.toggle('active', type === 'timing');
+      currentType = type;
+      document.getElementById('tab-night').classList.toggle('active', type === 'night');
+      document.getElementById('tab-day').classList.toggle('active', type === 'day');
+      document.getElementById('tab-timing').classList.toggle('active', type === 'timing');
 
-    document.getElementById('standard-fields').classList.toggle('hidden', type === 'timing');
-    document.getElementById('day-fields').classList.toggle('hidden', type !== 'day');
-    document.getElementById('timing-fields').classList.toggle('hidden', type !== 'timing');
-    updatePreview();
-  }
+      document.getElementById('standard-fields').classList.toggle('hidden', type === 'timing');
+      document.getElementById('day-fields').classList.toggle('hidden', type !== 'day');
+      document.getElementById('timing-fields').classList.toggle('hidden', type !== 'timing');
+      updatePreview();
+    }
 
 
-  function addPartRow(name = '', plan = '', fact = '', defect = '') {
-    const container = document.getElementById('parts-container');
-    const row = document.createElement('div');
-    row.className = 'part-row';
-    row.innerHTML = `
+    function addPartRow(name = '', plan = '', fact = '', defect = '') {
+      const container = document.getElementById('parts-container');
+      const row = document.createElement('div');
+      row.className = 'part-row';
+      row.innerHTML = `
       <input type="text" class="part-name" placeholder="16v4" value="${name}" oninput="updatePreview()">
       <input type="number" class="part-plan" placeholder="0" value="${plan}" oninput="updatePreview()">
       <input type="number" class="part-fact" placeholder="0" value="${fact}" oninput="updatePreview()">
       <input type="number" class="part-defect" placeholder="0" value="${defect}" oninput="updatePreview()">
       <button class="btn-del" onclick="removeRow(this)">×</button>
     `;
-    container.appendChild(row);
-    updatePreview();
-  }
-
-  function removeRow(btn) {
-    const rows = document.querySelectorAll('.part-row');
-    if (rows.length > 1) {
-      btn.parentElement.remove();
+      container.appendChild(row);
       updatePreview();
     }
-  }
 
-  function updatePreview() {
-    const sector = document.getElementById('sector').value.trim() || '__';
-    localStorage.setItem('saved_sector', document.getElementById('sector').value);
-
-    const rows = document.querySelectorAll('.part-row');
-    let lines = [];
-    let totalPlan = 0;
-    let totalFact = 0;
-
-    rows.forEach(row => {
-      const name = row.querySelector('.part-name').value.trim();
-      const plan = row.querySelector('.part-plan').value.trim();
-      const fact = row.querySelector('.part-fact').value.trim();
-      const defect = row.querySelector('.part-defect').value.trim() || '0';
-
-      if (name || plan || fact) {
-        lines.push(`${name || '?'} - ${plan || 0} / ${fact || 0} / ${defect}`);
-        totalPlan += Number(plan) || 0;
-        totalFact += Number(fact) || 0;
+    function removeRow(btn) {
+      const rows = document.querySelectorAll('.part-row');
+      if (rows.length > 1) {
+        btn.parentElement.remove();
+        updatePreview();
       }
-    });
-
-    let text = '';
-    if (currentType === 'night') {
-      text = `#отчет\n${sector} участок, с ночи (снял)\n\nДеталь-план/факт/брак\n` + lines.join('\n');
-           } else if (currentType === 'timing') {
-      let remLines = [];
-      document.querySelectorAll('.t-removed-row').forEach(row => {
-        const name = row.querySelector('.t-rem-name').value.trim();
-        const qty = row.querySelector('.t-rem-qty').value.trim();
-        if (name || qty) {
-          remLines.push(`${name || '?'} - ${qty || 0}шт`);
-        }
-      });
-
-            let launchLines = [];
-      document.querySelectorAll('.t-launched-row').forEach(row => {
-        const part = row.querySelector('.t-launch-part').value.trim();
-        const count = row.querySelector('.t-launch-count').value.trim();
-        const dur = row.querySelector('.t-launch-time').value.trim();
-        if (part || count || dur) {
-          const endTime = getMoscowEndTime(dur);
-          const partPrefix = part ? `${part} - ` : '';
-          launchLines.push(`${partPrefix}${count || 0} пр. (закончат: ${endTime})`);
-        }
-      });
-
-      text = `#тайминги \n\n` +
-             `уч. ${sector}\n\n` +
-             `Снял:\n${remLines.length ? remLines.join('\n') : '-'}\n\n` +
-             `Запущено:\n${launchLines.length ? launchLines.join('\n') : '-'}`;
-    } else {
-
-      const percent = totalPlan > 0 ? Math.floor((totalFact / totalPlan) * 100) : 0;
-      const pIn = document.getElementById('printers-in').value.trim() || '0';
-      const pOut = document.getElementById('printers-out').value.trim() || '0';
-      const comment = document.getElementById('comment').value.trim() || '-';
-
-      text = `#отчет\n${sector} участок, за весь день\nДеталь - план / факт / брак\n\n` +
-             lines.join('\n') + `\nИтог: ${percent}%\n\n` +
-             `Принял / Сдал\n${pIn} / ${pOut} принтеров\n\n` +
-             `Коментарий: ${comment}`;
     }
 
-    document.getElementById('preview').textContent = text;
-  }
+    function updatePreview() {
+      const sector = document.getElementById('sector').value.trim() || '__';
+      localStorage.setItem('saved_sector', document.getElementById('sector').value);
 
-  function copyReport() {
-    const text = document.getElementById('preview').textContent;
-    const btn = document.getElementById('copy-btn');
-    navigator.clipboard.writeText(text).then(() => {
-      btn.textContent = 'Скопировано! Можно вставлять';
-      btn.style.background = '#28a745';
-      setTimeout(() => {
-        btn.textContent = 'Скопировать отчет';
-        btn.style.background = '#2481cc';
-      }, 2000);
-    });
-  }
+      const rows = document.querySelectorAll('.part-row');
+      let lines = [];
+      let totalPlan = 0;
+      let totalFact = 0;
 
-     function addRemovedRow() {
-    const container = document.getElementById('t-removed-container');
-    const row = document.createElement('div');
-    row.className = 'timing-row t-removed-row';
-    row.innerHTML = `
+      rows.forEach(row => {
+        const name = row.querySelector('.part-name').value.trim();
+        const plan = row.querySelector('.part-plan').value.trim();
+        const fact = row.querySelector('.part-fact').value.trim();
+        const defect = row.querySelector('.part-defect').value.trim() || '0';
+
+        if (name || plan || fact) {
+          lines.push(`${name || '?'} - ${plan || 0} / ${fact || 0} / ${defect}`);
+          totalPlan += Number(plan) || 0;
+          totalFact += Number(fact) || 0;
+        }
+      });
+
+      let text = '';
+      if (currentType === 'night') {
+        text = `#отчет\n${sector} участок, с ночи (снял)\n\nДеталь-план/факт/брак\n` + lines.join('\n');
+      } else if (currentType === 'timing') {
+        let remLines = [];
+        document.querySelectorAll('.t-removed-row').forEach(row => {
+          const name = row.querySelector('.t-rem-name').value.trim();
+          const qty = row.querySelector('.t-rem-qty').value.trim();
+          if (name || qty) {
+            remLines.push(`${name || '?'} - ${qty || 0}шт`);
+          }
+        });
+
+        let launchLines = [];
+        document.querySelectorAll('.t-launched-row').forEach(row => {
+          const part = row.querySelector('.t-launch-part').value.trim();
+          const count = row.querySelector('.t-launch-count').value.trim();
+          const dur = row.querySelector('.t-launch-time').value.trim();
+          if (part || count || dur) {
+            const endTime = getMoscowEndTime(dur);
+            const partPrefix = part ? `${part} - ` : '';
+            launchLines.push(`${partPrefix}${count || 0} пр. (закончат: ${endTime})`);
+          }
+        });
+
+        text = `#тайминги \n\n` +
+          `уч. ${sector}\n\n` +
+          `Снял:\n${remLines.length ? remLines.join('\n') : '-'}\n\n` +
+          `Запущено:\n${launchLines.length ? launchLines.join('\n') : '-'}`;
+      } else {
+
+        const percent = totalPlan > 0 ? ((totalFact / totalPlan) * 100).toFixed(2).replace('.', ',') : "0,00";
+        const pIn = document.getElementById('printers-in').value.trim() || '0';
+        const pOut = document.getElementById('printers-out').value.trim() || '0';
+        const comment = document.getElementById('comment').value.trim() || '-';
+
+        text = `#отчет\n${sector} участок, за весь день\nДеталь - план / факт / брак\n\n` +
+          lines.join('\n') + `\nИтог: ${percent}%\n\n` +
+          `Принял / Сдал\n${pIn} / ${pOut} принтеров\n\n` +
+          `Коментарий: ${comment}`;
+      }
+
+      document.getElementById('preview').textContent = text;
+    }
+
+    function copyReport() {
+      const text = document.getElementById('preview').textContent;
+      const btn = document.getElementById('copy-btn');
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Скопировано! Можно вставлять';
+        btn.style.background = '#28a745';
+        setTimeout(() => {
+          btn.textContent = 'Скопировать отчет';
+          btn.style.background = '#2481cc';
+        }, 2000);
+      });
+    }
+
+    function addRemovedRow() {
+      const container = document.getElementById('t-removed-container');
+      const row = document.createElement('div');
+      row.className = 'timing-row t-removed-row';
+      row.innerHTML = `
       <input type="text" class="t-rem-name text-left" placeholder="16v4" oninput="updatePreview()">
       <input type="number" class="t-rem-qty" placeholder="218" oninput="updatePreview()">
       <button class="btn-del" onclick="removeTimingRow(this, '.t-removed-row')">×</button>
     `;
-    container.appendChild(row);
-    updatePreview();
-  }
+      container.appendChild(row);
+      updatePreview();
+    }
 
     function addLaunchedRow() {
-    const container = document.getElementById('t-launched-container');
-    const row = document.createElement('div');
-    row.className = 'timing-row t-launched-row';
-    row.style.gridTemplateColumns = '1.2fr 0.9fr 1fr 34px';
-    row.innerHTML = `
+      const container = document.getElementById('t-launched-container');
+      const row = document.createElement('div');
+      row.className = 'timing-row t-launched-row';
+      row.style.gridTemplateColumns = '1.2fr 0.9fr 1fr 34px';
+      row.innerHTML = `
       <input type="text" class="t-launch-part text-left" placeholder="16v4" oninput="updatePreview()">
       <input type="number" class="t-launch-count" placeholder="104" oninput="updatePreview()">
       <input type="text" class="t-launch-time" placeholder="5:00" maxlength="5" oninput="formatDurationInput(this)">
       <button class="btn-del" onclick="removeTimingRow(this, '.t-launched-row')">×</button>
     `;
-    container.appendChild(row);
-    updatePreview();
-  }
-
-
-  function removeTimingRow(btn, selector) {
-    const rows = document.querySelectorAll(selector);
-    if (rows.length > 1) {
-      btn.parentElement.remove();
+      container.appendChild(row);
       updatePreview();
     }
-  }
+
+
+    function removeTimingRow(btn, selector) {
+      const rows = document.querySelectorAll(selector);
+      if (rows.length > 1) {
+        btn.parentElement.remove();
+        updatePreview();
+      }
+    }
 
     function formatDurationInput(el) {
-    let val = el.value.replace(/\D/g, '').slice(0, 4);
-    if (val.length >= 3) {
-      val = val.slice(0, -2) + ':' + val.slice(-2);
+      let val = el.value.replace(/\D/g, '').slice(0, 4);
+      if (val.length >= 3) {
+        val = val.slice(0, -2) + ':' + val.slice(-2);
+      }
+      el.value = val;
+      updatePreview();
     }
-    el.value = val;
-    updatePreview();
-  }
 
 
     function getMoscowEndTime(durationStr) {
-    const match = durationStr.match(/^(\d{1,2}):(\d{2})$/);
-    if (!match) return '--:--';
-    const addHours = parseInt(match[1], 10);
-    const addMins = parseInt(match[2], 10);
+      const match = durationStr.match(/^(\d{1,2}):(\d{2})$/);
+      if (!match) return '--:--';
+      const addHours = parseInt(match[1], 10);
+      const addMins = parseInt(match[2], 10);
 
-    const now = new Date();
-    const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
-    const mskTarget = new Date(utcMs + (3 * 3600000) + (addHours * 3600000) + (addMins * 60000));
+      const now = new Date();
+      const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
+      const mskTarget = new Date(utcMs + (3 * 3600000) + (addHours * 3600000) + (addMins * 60000));
 
-    const hh = String(mskTarget.getHours());
-    const mm = String(mskTarget.getMinutes()).padStart(2, '0');
-    return `${hh}:${mm}`;
-  }
-
-
+      const hh = String(mskTarget.getHours());
+      const mm = String(mskTarget.getMinutes()).padStart(2, '0');
+      return `${hh}:${mm}`;
+    }
 
 
-  // Запуск при открытии
-  document.getElementById('sector').value = localStorage.getItem('saved_sector') || '29';
-  addPartRow();
+
+
+    // Запуск при открытии
+    document.getElementById('sector').value = localStorage.getItem('saved_sector') || '29';
+    addPartRow();
     addRemovedRow();
-  addLaunchedRow();
+    addLaunchedRow();
 
-</script>
+  </script>
 </body>
+
 </html>
